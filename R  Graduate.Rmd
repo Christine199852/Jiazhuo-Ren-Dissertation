@@ -1,0 +1,2185 @@
+---
+title: "Graduate"
+author: "Jiazhuo  Ren"
+date: "6/21/2021"
+output: html_document
+---
+
+#deal with qualitative variable
+```{r}
+#qualitative variable
+xxc.ed$sex<-factor(xxc.ed$sex)
+xxc.ed$married<-factor(xxc.ed$married)
+xxc.ed$bank.cust<-factor(xxc.ed$bank.cust)
+xxc.ed$ethnicity<-factor(xxc.ed$ethnicity)
+xxc.ed$prior.def<-factor(xxc.ed$prior.def)
+xxc.ed$empl<-factor(xxc.ed$empl)
+xxc.ed$dr.lic<-factor(xxc.ed$dr.lic)
+xxc.ed$citizen<-factor(xxc.ed$citizen)
+xxc.ed$y<-factor(xxc.ed$y)
+
+# combine levels 2-7 of ethnicity into one
+levels(xxc.ed$ethnicity)
+levels(xxc.ed$ethnicity)[levels(xxc.ed$ethnicity)=="3"] <-"2"
+levels(xxc.ed$ethnicity)[levels(xxc.ed$ethnicity)=="4"] <-"2"
+levels(xxc.ed$ethnicity)[levels(xxc.ed$ethnicity)=="5"] <-"2"
+levels(xxc.ed$ethnicity)[levels(xxc.ed$ethnicity)=="6"] <-"2"
+levels(xxc.ed$ethnicity)[levels(xxc.ed$ethnicity)=="7"] <-"2"
+levels(xxc.ed$ethnicity)
+
+levels(xxc.ed$sex)
+levels(xxc.ed$married)
+levels(xxc.ed$bank.cust)
+levels(xxc.ed$ethnicity)
+levels(xxc.ed$prior.def)
+levels(xxc.ed$empl)
+levels(xxc.ed$dr.lic)
+levels(xxc.ed$citizen)
+
+#frequency table of categorical viables 
+table(xxc.ed$sex)
+table(xxc.ed$married)
+table(xxc.ed$bank.cust)
+table(xxc.ed$ethnicity)
+table(xxc.ed$prior.def)
+table(xxc.ed$empl)
+table(xxc.ed$dr.lic)
+table(xxc.ed$citizen)
+# 2-Way Frequency Table
+#table(xxc.ed$sex,xxc.ed$married,xxc.ed$bank.cust,xxc.ed$educ.lev,xxc.ed$ethnicity,xxc.ed$prior.def,xxc.ed$empl,xxc.ed$dr.lic,xxc.ed$citizen)
+
+#table1 <- xtabs(~ sex+married+y, xxc.ed)
+table1 <- xtabs(~ y+sex, xxc.ed)
+table2 <- xtabs(~ y+married, xxc.ed)
+table3 <- xtabs(~ y+bank.cust, xxc.ed)
+table4 <- xtabs(~ y+ethnicity, xxc.ed)
+table5 <- xtabs(~ y+prior.def, xxc.ed)
+table6 <- xtabs(~ y+empl, xxc.ed)
+table7 <- xtabs(~ y+dr.lic, xxc.ed)
+table8 <- xtabs(~ y+citizen, xxc.ed)
+table1
+margin.table(table1,1)
+margin.table(table1,2)
+prop.table(table1,1)
+prop.table(table1,2)
+chisq.test(table1)
+chisq.test(table2)
+chisq.test(table3)
+chisq.test(table4)
+chisq.test(table5)
+chisq.test(table6)
+chisq.test(table7)
+chisq.test(table8)
+
+table2
+table3
+table4
+table5
+table6
+table7
+table8
+
+#A "pairs" plot or scatterplot matrix which includes the numeric variables and y can give a good impression of the relationships between them all.
+pairs(xxc.num.ed, pch = 19, lower.panel = NULL)
+pairs(xxc.num.ed, pch = 19, col=xxc.num.ed$y+2,main=" The scatterplot")
+#pairs(xxc.num.ed_new, pch = 19, col=xxc.num.ed$y+2,main=" The scatterplot")
+pairs(y ~ age+debt+yrs.empl+cr.sc+inc,data=xxc.num.ed, main=" A scatterplot matrix ")
+split_data <- split(xxc.num.ed, xxc.num.ed$y)
+xxc.num.ed_0 <- split_data$"0"
+xxc.num.ed_1 <- split_data$"1"
+summary(xxc.num.ed_0)
+apply(xxc.num.ed_0,2,sd)
+summary(xxc.num.ed_1)
+apply(xxc.num.ed_1,2,sd)
+
+#plot a pair (one for the data with y = 0 and one when y = 1) of boxplots on the same diagram to graphically compare the distributions within each class.
+boxplot(age~y, data= xxc.ed, main=" The boxplot of y vs age", las=1,col=c(2,3))
+# calculate skewness
+j <- 1
+k <- 1
+age_0 <- 0
+age_1 <- 0
+for (i in 1:length(xxc.ed$age))
+{
+  if (xxc.ed$y[i]==1)
+  {
+    age_1[j] <-xxc.ed$age[i]
+    j <- j+1
+  }
+  if (xxc.ed$y[i]==0)
+  {
+    age_0[k] <-xxc.ed$age[i]
+    k <- k+1
+  }
+}
+library(moments)
+skewness(age_1)
+skewness(age_0)
+boxplot(debt~y, data= xxc.ed, main=" y vs debt", las=1)
+boxplot(yrs.empl~y, data= xxc.ed, main=" y vs yrs.empl", las=1, col=c(2,3))
+boxplot(cr.sc~y, data= xxc.ed, main=" y vs cr.sc", las=1)
+boxplot(inc~y, data= xxc.ed, main=" y vs income", las=1)
+attach(xxc.ed)
+#histogram
+hist(age_1, main = "age when y=1", xlab ="age")
+hist(age_0, main = "age when y=0", xlab ="age")
+#kernel density
+plot(density(age_1),main = "age when y=0", xlab ="age")
+plot(density(age_0),main = "age when y=0", xlab ="age")
+
+
+log(age_1)
+log(age_0)
+
+library(ggplot2)
+library(plyr)
+#Add variable education level to xxc.num.ed-xxc.num.ed_new
+education_level <- data.frame(educ.lev = xxc.ed$educ.lev)
+xxc.num.ed_new <- cbind(xxc.num.ed, education_level)
+xxc.num.ed_new <- xxc.num.ed_new [, c(1, 2, 3, 4, 5, 7, 6)]
+library(tidyr)
+plotdata <- gather(xxc.num.ed_new,key="variable",value="value",c(-y))
+ggplot(plotdata,aes(color = factor(y))) +
+  theme_bw() + geom_density(aes(value), alpha=0.5) + 
+  facet_wrap(~variable, scales = "free") +
+  ggtitle("Kernel density estimation about different y") +
+  theme(plot.title = element_text(hjust = 0.5)) #center title
+
+plotdata_noy <- gather(xxc.num.ed_new[,-6],key="variable",value="value",1:6)
+ggplot(plotdata_noy) +
+  theme_bw() + geom_density(aes(value), alpha=0) + 
+  facet_wrap(.~variable, scales = "free") +
+  theme(axis.text.x = element_text(angle = 100)) +
+  ggtitle("Overall kernel density estimation") +
+  theme(plot.title = element_text(hjust = 0.5)) #center title
+```
+
+#data process-log transformation
+```{r}
+agelog <- data.frame(agelog = log(xxc.ed$age+1))
+debtlog <- data.frame(debtlog = log(xxc.ed$debt+1))
+yrs.empllog <- data.frame(yrs.empllog = log(xxc.ed$yrs.empl+1))
+cr.sclog <- data.frame(cr.sclog = log(xxc.ed$cr.sc+1))
+inclog <- data.frame(inclog = log(xxc.ed$inc+1))
+xxc.num.ed_log <- cbind(agelog, cbind(debtlog, cbind(yrs.empllog, cbind(cr.sclog, cbind(inclog)))))
+
+library(ggplot2)
+library(tidyr)
+plotdata_log <- gather(xxc.num.ed_log,key="variable",value="value",1:5)
+logp <- ggplot(plotdata_log) +
+  theme_bw() + geom_density(aes(value), alpha=0) + 
+  facet_wrap(.~variable, ncol = 3, scales = "free_x") +
+  theme(axis.text.x = element_text(angle = 100)) +
+  ggtitle("Overall kernel density estimation after log transmation") +
+  theme(plot.title = element_text(hjust = 0.5)) #center title
+
+#facet_grid & facet_wrap facet wrap() results in an uneven number of figures
+library(ggplot2)
+library(cowplot)
+plot_grid(
+    logp %+% subset(plotdata_log, variable == c("agelog","cr.sclog","debtlog")),
+    logp %+% subset(plotdata_log, variable == c("inclog","yrs.empllog")),
+    nrow = 2
+)
+
+#new data-delete zip code and log
+attach(xxc.ed)
+xxc.ed_new  <- cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(data.frame(sex),agelog),debtlog),data.frame(married)),data.frame(bank.cust )),data.frame(educ.lev)),data.frame(ethnicity)),yrs.empllog),data.frame(prior.def)),data.frame(empl)),cr.sclog),data.frame(dr.lic)),data.frame(citizen)),inclog),data.frame(y))
+
+#Fit logistic regression models with one covariate at a time
+model1 <- glm(formula = y ~ sex, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model1)
+model2 <- glm(formula = y ~ agelog, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model2)
+model3 <- glm(formula = y ~ debtlog, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model3)
+model4 <- glm(formula = y ~ married, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model4)
+model5 <- glm(formula = y ~ educ.lev, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model5)
+model6 <- glm(formula = y ~ ethnicity, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model6)
+model7 <- glm(formula = y ~ yrs.empllog, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model7)
+model8 <- glm(formula = y ~ prior.def, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model8)
+model9 <- glm(formula = y ~ empl, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model9)
+model10 <- glm(formula = y ~ cr.sclog, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model10)
+model11 <- glm(formula = y ~ dr.lic, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model11)
+model12 <- glm(formula = y ~ citizen, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model12)
+model13 <- glm(formula = y ~ inclog, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model13)
+
+#omit bank.cust
+model_full <- glm(formula = y ~ sex + agelog + debtlog + married + educ.lev + ethnicity + yrs.empllog + prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data = xxc.ed_new, family = binomial(link = "logit"))
+summary(model_full)
+
+#calculate p
+mod.pred_full<-predict(object=model_full, newdata=xxc.ed_new, type="response")
+mod.pred_full
+
+
+class.pred=function(p.hat, nsize){
+est.gp=0
+for (i in 1:nsize){
+if(p.hat[i] > 0.5) {est.gp[i] =1L} 
+else {est.gp[i]=0L}
+}
+return(est.gp)
+}
+
+n<-nrow(xxc.ed_new)
+est.y<-class.pred(mod.pred_full, n)
+
+#Confusion matrix
+confusion.matrix<-table(xxc.ed_new$y, est.y)
+names(dimnames(confusion.matrix))<-c("Actual", "Predicted")
+confusion.matrix
+
+addmargins(confusion.matrix)
+
+accuracy<-(confusion.matrix[1,1]+confusion.matrix[2,2])/n
+accuracy
+
+tp<-confusion.matrix[2,2]
+tp
+fp<-confusion.matrix[1,2]
+fp
+
+tn<-confusion.matrix[1,1]
+tn
+fn<-confusion.matrix[2,1]
+fn
+
+# TPR = sensitivity
+
+TPR<-tp/(tp+fn)
+TPR
+
+# TNR = specificity
+TNR<-tn/(tn+fp)
+TNR
+
+Youden.J<- TPR+TNR-1
+Youden.J
+
+MCC<- ((tp*tn)-(fp*fn))/(sqrt(tp+fp)*sqrt(tp+fn)*sqrt(tn+fp)*sqrt(tn+fn)) 
+MCC
+
+#80% training data to 20% test data - Pareto Principle
+sample_size = floor(0.8*nrow(xxc.ed_new))
+sample_size
+
+set.seed(1)
+
+# randomly split data in r
+picked <- sample(seq_len(nrow(xxc.ed_new)),size = sample_size)
+training <- xxc.ed_new[picked,]
+test <- xxc.ed_new[-picked,]
+
+#omit bank.cust
+train.model <- glm(formula = y ~ sex + agelog + debtlog + married + educ.lev + ethnicity + yrs.empllog + prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data=training, family = binomial(link = "logit"))
+
+
+summary(train.model)
+
+
+test.pred<-predict(object=train.model, newdata=test, type="response")
+test.pred
+
+test.y<-class.pred(test.pred, length(test.pred))#estimate
+
+
+test.res<- as.matrix(table(test$y, test.y))#confusion matrix
+test.res
+
+#confusion matrix
+confusion.matrix1 <- table(test$y, test.y)
+names(dimnames(confusion.matrix1))<-c("Actual", "Predicted")
+confusion.matrix1
+addmargins(confusion.matrix1)
+
+test.acc<-sum(diag(test.res))/sum(test.res)
+test.acc
+
+# accuracy
+accuracy1<-(confusion.matrix1[1,1]+confusion.matrix1[2,2])/nrow(test)
+accuracy1
+
+test.err<-1-test.acc
+test.err
+
+#create TT82 Functon -Train the model using the new training set and test it with the new test data. Carry out this step M times and then average the results.
+TT82 <- function(data,m) {
+  for (i in 1:m){
+    #80% training data to 20% test data - Pareto Principle
+    sample_size = floor(0.8*nrow(data))
+    # randomly split data in r
+    picked <- sample(seq_len(nrow(data)),size = sample_size)
+    training <- data[picked,]
+    test <- data[-picked,]
+    #omit bank.cust
+    train.model <- glm(formula = y ~ sex + agelog + debtlog + married + educ.lev + ethnicity + yrs.empllog + prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data=training, family = binomial(link = "logit"))
+    test.pred<-predict(object=train.model, newdata=test, type="response")
+    test.pred
+    test.y<-class.pred(test.pred, length(test.pred))#estimate
+    #confusion matrix
+    confusion.matrix1 <- table(test$y, test.y)
+    names(dimnames(confusion.matrix1))<-c("Actual", "Predicted")
+    addmargins(confusion.matrix1)
+    # accuracy
+    accuracy1<-(confusion.matrix1[1,1]+confusion.matrix1[2,2])/nrow(test)
+    accuracy1
+    error1<-1-accuracy1
+    test.err82[i] <- error1
+  }
+  mean(test.err82)
+}
+
+
+
+library(boot)
+
+# help(cv.glm)
+
+cost <- function(r, pi = 0) mean(abs(r-pi) > 0.5)
+
+cv.err1 <- cv.glm(data=xxc.ed_new, glmfit=model_full, cost=cost,  K=n)
+
+cv.err1[[3]]
+#cv.err1$delta[1]
+
+#Leave-One-Out Cross-Validation
+  cv.err <- cv.glm(data=xxc.ed_new, glmfit=model_full)$delta[1]
+  #[1] 0.09725107
+# k-Fold Cross-Validation
+#k = 10
+cv.error.10=cv.glm(data=xxc.ed_new, glmfit=model_full, K=10)$delta[1]
+cv.error.10
+#[1] 0.09770587
+#Notice that the computation time is much shorter than that of LOOCV.
+
+#An alternative is to use the functions trainControl and train from the package caret
+```
+
+#Stepwise Selection
+```{r}
+#Stepwise Selection
+library(MASS)
+model_step <- model_full %>% stepAIC(trace = FALSE)
+summary(model_step)
+summary(model_full)
+coef(model_step)
+coef(model_full)
+cv.error.10_full=cv.glm(data=xxc.ed_new, glmfit=model_full, K=10)$delta[1]
+cv.error.10_full#[1] 0.09979683
+cv.error.10_step=cv.glm(data=xxc.ed_new, glmfit=model_step, K=10)$delta[1]
+cv.error.10_step#[1] 0.09349954
+# the stepwise regression have selected a reduced number of predictor variables resulting to a final model, which performance was similar to the one of the full model.So, the stepwise selection reduced the complexity of the model without compromising its accuracy. Note that, all things equal, we should always choose the simpler model, here the final model returned by the stepwise regression.
+###################################################################################################
+```
+
+#use boxplot to find outliers
+```{r}
+#use boxplot to find outliers
+boxplot(xxc.ed_new$agelog, main="agelog", las=1)
+boxplot(xxc.ed_new$debtlog,  main="debtlog", las=1)
+boxplot(xxc.ed_new$yrs.empllog, main="yrs.empllog", las=1)
+boxplot(xxc.ed_new$cr.sclog, main="cr.sclog", las=1)
+boxplot(xxc.ed_new$inclog, main="inclog", las=1)
+boxplot(xxc.ed_new$educ.lev,main="educ.lev", las=1)
+```
+
+#logistic model
+```{r}
+#logistic model
+#the function of computing the predicted response-y=1 if p>0.5
+class.pred=function(p.hat, nsize){
+est.gp=0
+for (i in 1:nsize){
+if(p.hat[i] > 0.5) {est.gp[i] =1L} 
+else {est.gp[i]=0L}
+}
+return(est.gp)
+}
+
+#stepwise selection function
+stepwise <- function(start_model,full_model,test)
+{
+  stepmodel_f <- step(start_model, direction = "forward",scope = formula(full_model),trace = 0)
+  stepmodel_b <- step(full_model, direction = "backward",trace = 0)
+  stepmodel <- step(start_model, direction = "both",scope = formula(full_model),trace = 0)
+  p_step <- predict(object=stepmodel, newdata=test, type="response")#Model after stepwise regression
+  p_step
+}
+
+accuracy82_repeat <- numeric(1000)
+accuracy82_repeat_step <- numeric(1000)
+for(i in 1:1000)
+{
+  set.seed(i) #different seeds for randomly spliting data(82)
+  #80% training data to 20% test data based on the Pareto Principle
+  sample_size = floor(0.8*nrow(xxc.ed_new)) #the size of the training set
+  picked <- sample(seq_len(nrow(xxc.ed_new)),size = sample_size)
+  training82 <- xxc.ed_new[picked,]#the training set
+  test82 <- xxc.ed_new[-picked,]#the test set
+  #omit bank.cust(full)
+  train.modelall_82 <- glm(formula = y ~ sex + agelog + debtlog + married + educ.lev + ethnicity + yrs.empllog + prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data=training82, family = binomial(link = "logit")) #full model
+  p82 <- predict(object=train.modelall_82, newdata=test82, type="response") #Model before stepwise
+  n<-nrow(test82)
+  est.y82<-class.pred(p82, n)
+  confusion.matrix82<-table(test82$y, est.y82)
+  accuracy82_repeat[i]<-(confusion.matrix82[1,1]+confusion.matrix82[2,2])/n
+  train.modelstart_82 <- glm(formula = y ~ 1, data=training82, family = binomial(link = "logit")) 
+  p82_step <- stepwise(train.modelstart_82,train.modelall_82,test82)
+  est.y82_step<-class.pred(p82_step, n)
+  confusion.matrix82_step<-table(test82$y, est.y82_step)
+  accuracy82_repeat_step[i]<-(confusion.matrix82_step[1,1]+confusion.matrix82_step[2,2])/n
+}
+mean_accuracy82 <- mean(accuracy82_repeat[i])
+mean_err <- 1-mean_accuracy82
+mean_accuracy82
+mean_err
+mean_accuracy82_step <- mean(accuracy82_repeat_step[i])
+mean_err_step <- 1-mean_accuracy82_step
+mean_accuracy82_step
+mean_err_step
+```
+
+#logistic regression
+#The Validation Set Approach
+```{r}
+#logistic regression
+#The Validation Set Approach
+#obtain the same result all the time when using sampling
+set.seed(415) #different seeds for randomly spliting data(82)
+#80% training data to 20% test data based on the Pareto Principle
+sample_size = floor(0.8*nrow(xxc.ed_new)) #the size of the training set
+picked <- sample(seq_len(nrow(xxc.ed_new)),size = sample_size)
+training82 <- xxc.ed_new[picked,]#the training set
+test82 <- xxc.ed_new[-picked,]#the test set
+#omit bank.cust(full)
+train.modelall_82 <- glm(formula = y ~ sex + agelog + debtlog + married + educ.lev + ethnicity +yrs.empllog + prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data=training82, family = binomial(link = "logit")) #full model
+#calculate p
+p82 <- predict(object=train.modelall_82, newdata=test82, type="response") #Model before stepwise
+n<-nrow(test82)
+est.y82<-class.pred(p82, n)
+confusion.matrix82<-table(test82$y, est.y82)#Confusion matrix
+names(dimnames(confusion.matrix82))<-c("Actual", "Predicted")
+addmargins(confusion.matrix82)
+accuracy82<-(confusion.matrix82[1,1]+confusion.matrix82[2,2])/n
+accuracy82
+1-accuracy82
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table1 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix82[1,1],confusion.matrix82[1,2],confusion.matrix82[2,1],confusion.matrix82[2,2]))
+t1 <- table1 %>%
+  mutate(judge = ifelse(table1$Predicted == table1$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m1 <- ggplot(t1, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table1$Actual))) + 
+  labs(title = "The Validation Set Approach on the full model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ 
+#Perform the stepwise method on the logistic regression model to filter variables
+train.modelstart_82 <- glm(formula = y ~ 1, data=training82, family = binomial(link = "logit")) 
+
+stepmodel82_f <- step(train.modelstart_82, direction = "forward",scope = formula(train.modelall_82))
+summary(stepmodel82_f)
+stepmodel82_b <- step(train.modelall_82, direction = "backward")
+summary(stepmodel82_b)
+stepmodel82 <- step(train.modelstart_82, direction = "both",scope = formula(train.modelall_82))
+summary(stepmodel82)
+#Visualize the above process 
+library(ggplot2)
+as.factor(stepmodel82_f$anova$Step)
+ggplot(data = stepmodel82_f$anova,aes(x=reorder(Step,-AIC),AIC))+
+  geom_point(colour = "red", size = 3)+
+  geom_text(aes(y=AIC-25,label = round(AIC,2)))+
+  theme(axis.text.x = element_text(angle = 30,size = 12))+
+  labs(x = "omitted predictor")+
+  theme_bw(base_family = "STKaiti", base_size = 12)
+
+as.factor(stepmodel82_b$anova$Step)
+p_b <- ggplot(data = stepmodel82_b$anova,aes(x=reorder(Step,-AIC),AIC))+
+  geom_point(colour = "red", size = 3)+
+  geom_text(aes(y=AIC-1,label = round(AIC,2)))+
+  theme(axis.text.x = element_text(angle = 30,size = 12))+
+  labs(x = "omitted predictor",title = "backward selection")+
+  theme_bw(base_family = "STKaiti", base_size = 12)+
+  theme(plot.title = element_text(hjust = 0.5))
+
+as.factor(stepmodel82$anova$Step)
+p_h <- ggplot(data = stepmodel82$anova,aes(x=reorder(Step,-AIC),AIC))+
+  geom_point(colour = "red", size = 3)+
+  geom_text(aes(y=AIC-25,label = round(AIC,2)))+
+  theme(axis.text.x = element_text(angle = 30,size = 12))+
+  labs(x = "omitted predictor",title = "forward selection and the hybrid approach")+
+  theme_bw(base_family = "STKaiti", base_size = 12)+
+  theme(plot.title = element_text(hjust = 0.5))
+
+library(gridExtra)
+grid.arrange(p_b,p_h,nrow=2)#combine two plots into one figure
+
+p82_step <- predict(object=stepmodel82, newdata=test82, type="response")#Model after stepwise regression
+est.y82_step<-class.pred(p82_step, n)
+
+#Confusion matrix
+confusion.matrix82_step<-table(test82$y, est.y82_step)
+names(dimnames(confusion.matrix82_step))<-c("Actual", "Predicted")
+addmargins(confusion.matrix82_step)
+
+accuracy82_step<-(confusion.matrix82_step[1,1]+confusion.matrix82_step[2,2])/n
+accuracy82_step
+1-accuracy82_step
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table2 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix82_step[1,1],confusion.matrix82_step[1,2],confusion.matrix82_step[2,1],confusion.matrix82_step[2,2]))
+t2 <- table2 %>%
+  mutate(judge = ifelse(table2$Predicted == table2$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m2 <- ggplot(t2, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2$Actual))) + 
+  labs(title = "The Validation Set Approach on the reduced model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(test82$y, p82, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "The Validation Set Approach")
+plot.roc(test82$y, p82_step, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("The full model","The reduced model"),col=c("#377eb8","#4daf4a"),lwd=4)
+```
+
+#logistic model+cross-validation
+```{r}
+#logistic model
+#cross-validation
+library(boot)
+#omit bank.cust
+model_full <- glm(formula = y ~ sex + agelog + debtlog + married + educ.lev + ethnicity + yrs.empllog + prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data = xxc.ed_new, family = binomial(link = "logit"))
+model_step <- glm(formula = y ~ married + ethnicity + yrs.empllog + prior.def + cr.sclog + inclog, data = xxc.ed_new, family = binomial(link = "logit"))
+set.seed(415)
+#Leave-One-Out Cross-Validation
+#the response is a binary variable
+cost <- function(y, hatp){
+    weight1 = 1 #cost for getting 1 wrong
+    weight0 = 1 #cost for getting 0 wrong
+    c1 = (y==1)&(hatp<0.5) #logical vector - true if actual 1 but predict 0
+    c0 = (y==0)&(hatp>=0.5) #logical vector - true if actual 0 but predict 1
+    return(mean(weight1*c1+weight0*c0))
+    }
+set.seed(415)
+#cost <- function(y, hatp) mean(abs(y-hatp) > 0.5)
+cv.err <- cv.glm(data=xxc.ed_new, glmfit=model_full,cost)$delta[1]
+cv.err
+1-cv.err
+set.seed(415)
+cv.error_step <- cv.glm(data=xxc.ed_new, glmfit=model_step, cost)$delta[1]
+cv.error_step
+1-cv.error_step
+
+# k-Fold Cross-Validation
+#k = 5
+set.seed(415)
+cv.error.5=cv.glm(data=xxc.ed_new, glmfit=model_full, cost, K=5)$delta[1]
+cv.error.5
+1-cv.error.5
+set.seed(415)
+cv.error.5_step <- cv.glm(data=xxc.ed_new, glmfit=model_step, cost, K=5)$delta[1] 
+cv.error.5_step
+1-cv.error.5_step
+
+CV_logistic_full <- function(data, k)
+{
+  set.seed(415)
+  data <- data[sample(nrow(data)),]
+  #Randomly break up the data into k folds
+  fold <- cut(seq(1,nrow(data)), breaks = k, labels=FALSE) #range from 1 to k
+  err <- 0
+  haty <- c()
+  hatp <- c()
+  testy <- c()
+  for(i in 1:k)
+  {
+    test_index <- which(fold==i, arr.ind=TRUE) #arr.ind=TRUE means the coordinate or position of fold==i
+    testX <- data[test_index, 1:(ncol(data)-1)]
+    trainX <- data[-test_index, 1:(ncol(data)-1)]
+    testY <- data[test_index, ncol(data)]
+    trainY <- data[-test_index, ncol(data)]
+    trainXY <- cbind(trainX, data.frame('y'=trainY))
+    testXY <- cbind(testX, data.frame('y'=testY))
+    ## Use the logistic regression
+    model_full <- glm(formula = y ~ sex + agelog + debtlog + married + educ.lev + ethnicity + yrs.empllog + prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data = trainXY, family = binomial(link = "logit"))
+    hatp1 <- predict(object = model_full, newdata=testXY, type="response")
+    haty1 <- class.pred(hatp1, nrow(testXY))
+    err <- err + mean(haty1 != testY)
+    haty <- c(haty, haty1)
+    hatp <- c(hatp, hatp1)
+    testy <- c(testy,testY)
+  }
+  err <- err/k
+  return(list('cv.error' = err, 'haty' = haty, 'hatp'=hatp, 'testy'=testy))
+}
+
+CV_logistic_step <- function(data, k)
+{
+  set.seed(415)
+  data <- data[sample(nrow(data)),]
+  #Randomly break up the data into k folds
+  fold <- cut(seq(1,nrow(data)), breaks = k, labels=FALSE) #range from 1 to k
+  err <- 0
+  haty <- c()
+  hatp <- c()
+  testy <- c()
+  for(i in 1:k)
+  {
+    test_index <- which(fold==i, arr.ind=TRUE) #arr.ind=TRUE means the coordinate or position of fold==i
+    testX <- data[test_index, 1:(ncol(data)-1)]
+    trainX <- data[-test_index, 1:(ncol(data)-1)]
+    testY <- data[test_index, ncol(data)]
+    trainY <- data[-test_index, ncol(data)]
+    trainXY <- cbind(trainX, trainY)
+    trainXY <- cbind(trainX, data.frame('y'=trainY))
+    testXY <- cbind(testX, data.frame('y'=testY))
+    ## Use the logistic regression
+    model_step <- glm(formula = y ~ married + ethnicity + yrs.empllog + prior.def + cr.sclog + inclog, data = trainXY, family = binomial(link = "logit"))
+    hatp1 <- predict(object = model_step, newdata=testXY, type="response")
+    haty1 <- class.pred(hatp1, nrow(testXY))
+    err <- err + mean(haty1 != testY)
+    haty <- c(haty, haty1)
+    hatp <- c(hatp, hatp1)
+    testy <- c(testy,testY)
+  }
+  err <- err/k
+  return(list('cv.error' = err, 'haty' = haty, 'hatp'=hatp, 'testy'=testy))
+}
+
+#LOOCV+logistic regression
+cv.logistic.me <- CV_logistic_full(xxc.ed_new, nrow(xxc.ed_new))
+cv.logistic.me$cv.error
+matrixLOOCV<-table(cv.logistic.me$testy, cv.logistic.me$haty)#Confusion matrix
+names(dimnames(matrixLOOCV))<-c("Actual", "Predicted")
+
+cv.logistic_step.me <- CV_logistic_step(xxc.ed_new, nrow(xxc.ed_new))
+cv.logistic_step.me$cv.error
+matrixLOOCV_step <-table(cv.logistic_step.me$testy, cv.logistic_step.me$haty)#Confusion matrix
+names(dimnames(matrixLOOCV_step))<-c("Actual", "Predicted")
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixLOOCV[1,1],matrixLOOCV[1,2],matrixLOOCV[2,1],matrixLOOCV[2,2]))
+t3 <- table3 %>%
+  mutate(judge = ifelse(table3$Predicted == table3$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m3 <- ggplot(t3, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3$Actual))) + 
+  labs(title = "LOOCV on the full model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table4 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixLOOCV_step[1,1],matrixLOOCV_step[1,2],matrixLOOCV_step[2,1],matrixLOOCV_step[2,2]))
+t4 <- table4 %>%
+  mutate(judge = ifelse(table4$Predicted == table4$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m4 <- ggplot(t4, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table4$Actual))) + 
+  labs(title = "LOOCV on the reduced model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(cv.logistic.me$testy, cv.logistic.me$hatp, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "LOOCV")
+plot.roc(cv.logistic_step.me$testy, cv.logistic_step.me$hatp, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("The full model","The reduced model"),col=c("#377eb8","#4daf4a"),lwd=4)
+
+
+#5-CV+logistic regression
+cv.5.logistic.me <- CV_logistic_full(xxc.ed_new,5)
+cv.5.logistic_step.me <- CV_logistic_step(xxc.ed_new,5)
+cv.5.logistic.me$cv.error
+matrixCV.5<-table(cv.5.logistic.me$testy, cv.5.logistic.me$haty)#Confusion matrix
+names(dimnames(matrixCV.5))<-c("Actual", "Predicted")
+
+cv.5.logistic_step.me$cv.error
+matrixCV.5_step<-table(cv.5.logistic_step.me$testy, cv.5.logistic_step.me$haty)#Confusion matrix
+names(dimnames(matrixCV.5_step))<-c("Actual", "Predicted")
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table5 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixCV.5[1,1],matrixCV.5[1,2],matrixCV.5[2,1],matrixCV.5[2,2]))
+t5 <- table5 %>%
+  mutate(judge = ifelse(table5$Predicted == table5$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m5 <- ggplot(t5, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table5$Actual))) + 
+  labs(title = "5-Fold CV on the full model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+table6 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixCV.5_step[1,1],matrixCV.5_step[1,2],matrixCV.5_step[2,1],matrixCV.5_step[2,2]))
+t6 <- table6 %>%
+  mutate(judge = ifelse(table6$Predicted == table6$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m6 <- ggplot(t6, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table6$Actual))) + 
+  labs(title = "5-Fold CV on the reduced model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(cv.5.logistic.me$testy, cv.5.logistic.me$hatp, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "5-Fold CV")
+plot.roc(cv.5.logistic_step.me$testy, cv.5.logistic_step.me$hatp, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("The full model","The reduced model"),col=c("#377eb8","#4daf4a"),lwd=4)
+```
+
+#logistic model+cross-validation+another coding method to compute a confusion matrix
+```{r}
+#logistic model
+#cross-validation
+#anothercoding method to compute a confusion matrix
+library(caret)
+set.seed(415)
+# define training control
+train_control <- trainControl(method = "LOOCV", savePredictions=TRUE)
+# train the full model on training set
+LOOCV.results <- train( y ~ sex + agelog + debtlog + married + educ.lev + ethnicity +yrs.empllog +prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data =xxc.ed_new,trControl = train_control, method ="glm",family="binomial")
+# print LOOCV scores
+matrixLOOCV<-table(LOOCV.results$pred$obs, LOOCV.results$pred$pred)#Confusion matrix
+names(dimnames(matrixLOOCV))<-c("Actual", "Predicted")
+LOOCVacc <- sum(diag(matrixLOOCV))/sum(matrixLOOCV)
+LOOCVacc
+LOOCVerr <- 1-LOOCVacc
+LOOCVerr
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixLOOCV[1,1],matrixLOOCV[1,2],matrixLOOCV[2,1],matrixLOOCV[2,2]))
+t3 <- table3 %>%
+  mutate(judge = ifelse(table3$Predicted == table3$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m3 <- ggplot(t3, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3$Actual))) + 
+  labs(title = "LOOCV on the full model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# train the reduced model on training set LOOCV
+train_control <- trainControl(method = "LOOCV", savePredictions=TRUE)
+LOOCV.results_step <- train(y ~ married + ethnicity + yrs.empllog + prior.def + cr.sclog + inclog, data
+                            =xxc.ed_new, trControl = train_control, method = "glm",family="binomial")
+# print LOOCV scores
+matrixLOOCV_step<-table(LOOCV.results_step$pred$obs, LOOCV.results_step$pred$pred)#Confusion matrix
+names(dimnames(matrixLOOCV_step))<-c("Actual", "Predicted")
+LOOCVacc_step <- sum(diag(matrixLOOCV_step))/sum(matrixLOOCV_step)
+LOOCVacc_step
+LOOCVerr_step <- 1-LOOCVacc_step
+LOOCVerr_step
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table4 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixLOOCV_step[1,1],matrixLOOCV_step[1,2],matrixLOOCV_step[2,1],matrixLOOCV_step[2,2]))
+t4 <- table4 %>%
+  mutate(judge = ifelse(table4$Predicted == table4$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m4 <- ggplot(t4, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table4$Actual))) + 
+  labs(title = "LOOCV on the reduced model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# train the full model on training set 5-Fold CV
+library(caret)
+set.seed(415)
+# define training control 
+train_control <- trainControl(method = "cv",  savePredictions=TRUE, number = 5)
+cv.results.5 <- train(y ~ sex + agelog + debtlog + married + educ.lev + ethnicity + yrs.empllog +
+	                      prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data = xxc.ed_new,
+	                    trControl = train_control,method = "glm",family="binomial")
+# print a confusion matrix
+matrixcv.5<-table(cv.results.5$pred$obs, cv.results.5$pred$pred)#Confusion matrix
+names(dimnames(matrixcv.5))<-c("Actual", "Predicted")
+cv.5acc <- sum(diag(matrixcv.5))/sum(matrixcv.5)
+cv.5acc
+cv.5err <- 1-cv.5acc
+cv.5err
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table5 <- data.frame(confusionMatrix(cv.results.5$pred$pred, cv.results.5$pred$obs,dnn = c("Predicted", "Actual"),positive="1")$table)
+ t5 <- table5 %>%
+     mutate(judge = ifelse(table5$Predicted == table5$Actual, "right", "wrong")) %>%
+     group_by(Actual)
+ 
+ m5 <- ggplot(t5, aes(x = Predicted, y = Actual, fill = judge)) +
+     geom_tile() +
+     geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+     scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+     ylim(rev(levels(table5$Actual))) + 
+     labs(title = "5-Fold CV on the full model") +
+     theme_bw() +
+     theme(plot.title = element_text(hjust = 0.5))
+ 
+# train the reduced model on training set 5-Fold CV
+library(caret)
+set.seed(415)
+# define training control 
+train_control <- trainControl(method = "cv",  savePredictions=TRUE, number = 5)
+cv.results.5_step <- train(y ~ married + ethnicity + yrs.empllog + prior.def + cr.sclog + inclog, data=xxc.ed_new, trControl = train_control, method = "glm",family="binomial")
+# print 5-Fold CV scores
+matrixcv.5_step<-table(cv.results.5_step$pred$obs, cv.results.5_step$pred$pred)#Confusion matrix
+names(dimnames(matrixcv.5_step))<-c("Actual", "Predicted")
+cv.5acc_step <- sum(diag(matrixcv.5_step))/sum(matrixcv.5_step)
+cv.5acc_step
+cv.5err_step <- 1-cv.5acc_step
+cv.5err_step
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table6 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixcv.5_step[1,1],matrixcv.5_step[1,2],matrixcv.5_step[2,1],matrixcv.5_step[2,2]))
+t6 <- table6 %>%
+  mutate(judge = ifelse(table6$Predicted == table6$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+ 
+m6 <- ggplot(t6, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table6$Actual))) + 
+  labs(title = "5-Fold CV on the reduced model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+ 
+#logistic model + validation 
+```{r}
+#logistic model+bootstrap
+boot_full <- function(data,B)
+{
+  haty <- c()
+  hatp <- c()
+  testy <- c()
+  for(i in 1:B)
+  {
+    pick <- sample(seq_len(nrow(data)),size = nrow(data),replace = TRUE)
+    boot_sample <- data[pick,]#the training set
+    test <- data[-picked,]#the test set
+    testY <- test$y
+    model_full <- glm(formula = y ~ sex + agelog + debtlog + married + educ.lev + ethnicity + yrs.empllog + prior.def + empl + cr.sclog + dr.lic + citizen + inclog, data = boot_sample, family = binomial(link = "logit"))
+    hatp1 <- predict(object = model_full, newdata=test, type="response")
+    haty1 <- class.pred(hatp1, nrow(test))
+    err <- err + mean(haty1 != testY)
+    haty <- c(haty, haty1)
+    hatp <- c(hatp, hatp1)
+    testy <- c(testy,testY)
+  }
+  err <- err/B
+  return(list('cv.error' = err, 'haty' = haty, 'hatp'=hatp, 'testy'=testy))
+}
+boot.full <- boot_full(xxc.ed_new,10000)
+matrixboot.full <-table(boot.full$testy, boot.full$haty)#Confusion matrix
+names(dimnames(matrixboot.full))<-c("Actual", "Predicted")
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table7 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixboot.full[1,1],matrixboot.full[1,2],matrixboot.full[2,1],matrixboot.full[2,2]))
+t7 <- table7 %>%
+  mutate(judge = ifelse(table7$Predicted == table7$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m7 <- ggplot(t7, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table7$Actual))) + 
+  labs(title = "Bootstrap on the full model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+boot_step <- function(data,B)
+{
+  haty <- c()
+  hatp <- c()
+  testy <- c()
+  for(i in 1:B)
+  {
+    pick <- sample(seq_len(nrow(data)),size = nrow(data),replace = TRUE)
+    boot_sample <- data[pick,]#the training set
+    test <- data[-picked,]#the test set
+    testY <- test$y
+    model_step <- glm(formula = y ~ married + ethnicity + yrs.empllog + prior.def + cr.sclog + inclog, data = boot_sample, family = binomial(link = "logit"))
+    hatp1 <- predict(object = model_step, newdata=test, type="response")
+    haty1 <- class.pred(hatp1, nrow(test))
+    err <- err + mean(haty1 != testY)
+    haty <- c(haty, haty1)
+    hatp <- c(hatp, hatp1)
+    testy <- c(testy,testY)
+  }
+  err <- err/B
+  return(list('cv.error' = err, 'haty' = haty, 'hatp'=hatp, 'testy'=testy))
+}
+boot.step <- boot_step(xxc.ed_new,10000)
+matrixboot.step <-table(boot.step$testy, boot.step$haty)#Confusion matrix
+names(dimnames(matrixboot.step))<-c("Actual", "Predicted")
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table8 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(matrixboot.step[1,1],matrixboot.step[1,2],matrixboot.step[2,1],matrixboot.step[2,2]))
+t8 <- table8 %>%
+  mutate(judge = ifelse(table8$Predicted == table8$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m8 <- ggplot(t8, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table8$Actual))) + 
+  labs(title = "Bootstrap on the reduced model") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(boot.full$testy, boot.full$hatp, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "Bootstrap")
+plot.roc(boot.step$testy, boot.step$hatp, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("The full model","The reduced model"),col=c("#377eb8","#4daf4a"),lwd=4)
+
+library(gridExtra)
+grid.arrange(m1,m2,m3,m4,m5,m6,m7,m8,nrow=4)#combine six confusion matrix plots into one figure
+```
+
+#KNN K-Nearest Neighbors
+#numeric variables for Euclidean distance
+```{r}
+#KNN K-Nearest Neighbors
+#numeric variables for Euclidean distance
+#standardise the data
+xxc.num.ed_log_scale <- scale(x = xxc.num.ed_log, center = TRUE, scale = TRUE)
+library(class)
+# randomly split data in r #80%
+set.seed (415)
+picked <- sample(seq_len(nrow(xxc.num.ed_log_scale)),size = sample_size)
+trainingX <- xxc.num.ed_log_scale[picked,]
+testX <- xxc.num.ed_log_scale[-picked,]
+train.y <- xxc.ed_new$y[picked]#A vector containing the class labels for the training observations, labeled train.y below.
+test.y <- xxc.ed_new$y[-picked]
+knn.pred=knn(trainingX,testX,train.y ,k=13)
+confusion.matrix_knn <- table(test.y,knn.pred )
+names(dimnames(confusion.matrix_knn))<-c("Actual", "Predicted")
+addmargins(confusion.matrix_knn)
+accuracy_knn<-(confusion.matrix_knn[1,1]+confusion.matrix_knn[2,2])/nrow(testX)
+accuracy_knn
+error_knn <- 1-accuracy_knn
+error_knn #0.2748092
+#mean(knn.pred==test.y)  #0.7251908
+#The results using K = 1 are very good, since only 72.51908 % of the observations are correctly predicted.
+
+set.seed(415)
+#5 fold cv + knn
+library(caret)
+xxc.num.ed_logy  <- cbind(xxc.num.ed_log,data.frame('y'=xxc.ed$y))
+training<- trainControl(method = "cv",number = 5)
+ksearch <- expand.grid(k=seq(1,655,2))
+fit <- train(x=xxc.num.ed_log_scale,y=xxc.ed_new$y,method="knn",trControl=training,tuneGrid=ksearch)
+p1 <- plot(fit,main="knn",family = "STKaiti") #k = 13
+ksearch.s <- expand.grid(k=seq(1,100,2))
+fit.s <- train(x=xxc.num.ed_log_scale,y=xxc.ed_new$y,method="knn",trControl=training,tuneGrid=ksearch.s)
+p2 <- plot(fit.s,main="knn of a small scale",family = "STKaiti") #k = 13
+library(gridExtra)
+grid.arrange(p1,p2,nrow=1)
+```
+# 415/1000/123/1  k=13 0.7770005/0.7861611/0.7862595
+#123-k = 89 0.7771167
+
+
+
+```{r}
+#data process
+attach(xxc.ed)
+agelog <- data.frame(agelog = log(xxc.ed$age+1))
+debtlog <- data.frame(debtlog = log(xxc.ed$debt+1))
+yrs.empllog <- data.frame(yrs.empllog = log(xxc.ed$yrs.empl+1))
+cr.sclog <- data.frame(cr.sclog = log(xxc.ed$cr.sc+1))
+inclog <- data.frame(inclog = log(xxc.ed$inc+1))
+xxc.num.ed_log <- cbind(agelog, cbind(debtlog, cbind(yrs.empllog, cbind(cr.sclog, cbind(inclog)))))
+#new data-delete zip code and log
+xxc.ed_new  <- cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(data.frame(sex),agelog),debtlog),data.frame(married)),data.frame(bank.cust         )),data.frame(educ.lev)),data.frame(ethnicity)),yrs.empllog),data.frame(prior.def)),data.frame(empl)),cr.sclog),data.frame(dr.lic)),data.frame(citizen)),inclog),data.frame(y))
+
+library(kmed)
+#Knn
+#new data-delete zip code, log transformation and standardise the data for Knn
+knn_X <- cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(data.frame('sex'=xxc.ed_new$sex),data.frame('married'=xxc.ed_new$married)),data.frame('bank.cust'=xxc.ed_new$bank.cust)),data.frame('prior.def'=xxc.ed_new$prior.def)),data.frame('empl'=xxc.ed_new$empl)),data.frame('dr.lic'=xxc.ed_new$dr.lic)),data.frame('citizen'=xxc.ed_new$citizen)),data.frame('ethnicity'=xxc.ed_new$ethnicity)),data.frame('educ.lev'=xxc.ed_new$educ.lev)),data.frame(xxc.num.ed_log_scale))
+knn_Y <- data.frame('y' = xxc.ed_new$y)
+knn_XY <- cbind(knn_X, knn_Y)
+
+#distance for mixed data
+#Gower distance
+library(kmed)
+Gower_d <- distmix(knn_X, method = "gower", idnum = 9:14, idbin = 1:7, idcat = 8)
+#Wishart distance
+Wishart_d <- distmix(knn_X, method = "wishart", idnum = 9:14, idbin = 1:7, idcat = 8)
+#Podani distance
+Podani_d <- distmix(knn_X, method = "podani", idnum = 9:14, idbin = 1:7, idcat = 8)
+#Ahmad distance
+Ahmad_d <- distmix(knn_X, method = "ahmad", idnum = 9:14, idbin = 1:7, idcat = 8)
+
+#define Gower coefficient distance by myself
+Gower_d_me <- function(data)
+{
+  Gower_d <- matrix(nrow=655,ncol=655) 
+  for(i in 1:655)
+  {
+    for(j in 1:655)
+    {
+      s_bi_ca <- sum(data[i,1:8]==data[j,1:8]) #similarity for binary and categorical variables
+      sk <- 0
+      for (k in 9:14)
+      {
+        Rk <- max(data[,k])-min(data[,k]) # range of a numeric variable k
+        sk <- sk + 1-abs(data[i,k]-data[j,k])/Rk #similarity for a numeric variable k
+      }
+      s <- (sum(s_bi_ca)+sk)/14
+      Gower_d[i,j] <- 1-s
+    }
+  }
+   Gower_d
+}
+Gower_dis_me <- Gower_d_me(knn_X)
+
+#define Wishart coefficient distance by myself
+Wishart_d_me <- function(data)
+{
+  Wishart_d <- matrix(nrow=655,ncol=655) 
+  for(i in 1:655)
+  {
+    for(j in 1:655)
+    {
+      d_bi_ca <- 8-sum(data[i,1:8]==data[j,1:8])
+      dk2 <- 0
+      for (k in 9:14)#idnum = 9:14
+      {
+        var.k <- var(data[,k]) # sd of a numeric variable k
+        dk2 <- dk2 + (data[i,k]-data[j,k])^2/var.k #distance for a numeric variable k
+      }
+      Wishart_d[i,j] <- sqrt((d_bi_ca+dk2)/14)
+    }
+  }
+   Wishart_d
+}
+Wishart_d_me <- Wishart_d_me(knn_X)
+
+#define Podani distance by myself
+Podani_d_me <- function(data)
+{
+  Podani_d <- matrix(nrow=655,ncol=655) 
+  for(i in 1:655)
+  {
+    for(j in 1:655)
+    {
+      d_bi_ca <- 8-sum(data[i,1:8]==data[j,1:8])
+      dk2 <- 0
+      for (k in 9:14)
+      {
+        Rk <- max(data[,k])-min(data[,k])
+        dk2 <- dk2 + ((data[i,k]-data[j,k])/Rk)^2 #distance for a numeric variable k
+      }
+      Podani_d[i,j] <- sqrt(d_bi_ca+dk2)
+    }
+  }
+   Podani_d
+}
+Podani_d_me <- Podani_d_me(knn_X)
+
+#define Ahmad distance by myself
+Ahmad_d_me <- function(data)
+{
+  Ahmad_d <- matrix(nrow=655,ncol=655)
+  co.ca.d <- cooccur(data[,1:8])
+  for(i in 1:655)
+  {
+    for(j in 1:655)
+    {
+      d2.num <- 0
+      for (k in 9:14)#idnum = 9:14
+      {
+        d2.num <- d2.num + (data[i,k]-data[j,k])^2 #distance for a numeric variable k
+      }
+      Ahmad_d[i,j] <- d2.num + (co.ca.d[i,j])^2
+    }
+  }
+   Ahmad_d
+}
+Ahmad_d_me <- Ahmad_d_me(knn_X)
+
+#find the source of the function
+install.packages("lookup")
+library("lookup")
+body(distmix) 
+body(cooccur) 
+
+
+#promoted Knn for different distance function
+Knn_pro <- function(trainx, testx, trainy, K, method)
+{
+  # a empty vector for prediction
+  pred <- c()
+  prob <- c()
+  # calculate distance
+  n_train <- nrow(trainx)
+  n_test <- nrow(testx)
+  X <- rbind(trainx, testx)
+  
+  #distance between a train set and a test set, each column represents an observation in a test set,each row represents an observation in a training set
+  dist <- matrix(distmix(X, method=method, idnum = 9:14, idbin = 1:7, idcat = 8)[1:n_train,(n_train+1):(n_train+n_test)],nrow = n_train) 
+  
+  # Iterate over each each data point in a test set
+  for (i in 1:n_test)
+  {
+    # combine the distance and the corresponding y values
+    dist_y <- data.frame(dist = dist[,i], 'y' = trainy)
+    # sort observations according to distance
+    dist_y <- dist_y[order(dist_y$dist),]
+    # Choose the K closest neighbours
+    dist_y.neigh <- dist_y[1:K,]
+    #Identify the class of the higher occurrence
+    pred1 <- names(sort(summary(dist_y.neigh$y), decreasing=T)[1])
+    prob1 <- sum(dist_y.neigh$y==1)/K
+    pred <- c(pred, pred1)
+    prob <- c(prob, prob1)
+  }
+  return(list('class'= pred,'prob'= prob))
+}
+
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(testY.knn,prob.Gower, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "Knn on Gower's distance for The Validation Set Approach")
+
+#Wishart's distance
+Knn_pred.Wishart <- Knn_pro(trainingX.knn, testX.knn, trainingY.knn, 5,"wishart")$class
+prob.Wishart <- Knn_pro(trainingX.knn, testX.knn, trainingY.knn, 5,"wishart")$prob
+confusion.matrix.Knn.Wishart <- table(testY.knn, Knn_pred.Wishart)
+names(dimnames(confusion.matrix.Knn.Wishart))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.Knn.Wishart)
+accuracy.Knn.Wishart<-(confusion.matrix.Knn.Wishart[1,1]+confusion.matrix.Knn.Wishart[2,2])/nrow(testX.knn)
+accuracy.Knn.Wishart
+1-accuracy.Knn.Wishart
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table2.2 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.Knn.Wishart[1,1],confusion.matrix.Knn.Wishart[1,2],confusion.matrix.Knn.Wishart[2,1],confusion.matrix.Knn.Wishart[2,2]))
+t2.2 <- table2.2 %>%
+  mutate(judge = ifelse(table2.2$Predicted == table2.2$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.2 <- ggplot(t2.2, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.2$Actual))) + 
+  labs(title = "Knn on Wishart's distance for The Validation Set Approach") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(testY.knn,prob.Wishart, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "Knn on Wishart's distance for The Validation Set Approach")
+
+#Podani's distance
+Knn_pred.Podani <- Knn_pro(trainingX.knn, testX.knn, trainingY.knn, 5,"podani")$class
+prob.Podani <- Knn_pro(trainingX.knn, testX.knn, trainingY.knn, 5,"podani")$prob
+confusion.matrix.Knn.Podani <- table(testY.knn, Knn_pred.Podani)
+names(dimnames(confusion.matrix.Knn.Podani))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.Knn.Podani)
+accuracy.Knn.Podani<-(confusion.matrix.Knn.Podani[1,1]+confusion.matrix.Knn.Podani[2,2])/nrow(testX.knn)
+accuracy.Knn.Podani
+1-accuracy.Knn.Podani
+```
+
+# distance for mixed data
+```{r}
+#data process
+agelog <- data.frame(agelog = log(xxc.ed$age+1))
+debtlog <- data.frame(debtlog = log(xxc.ed$debt+1))
+yrs.empllog <- data.frame(yrs.empllog = log(xxc.ed$yrs.empl+1))
+cr.sclog <- data.frame(cr.sclog = log(xxc.ed$cr.sc+1))
+inclog <- data.frame(inclog = log(xxc.ed$inc+1))
+xxc.num.ed_log <- cbind(agelog, cbind(debtlog, cbind(yrs.empllog, cbind(cr.sclog, cbind(inclog)))))
+#new data-delete zip code and log
+xxc.ed_new  <- cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(data.frame(sex),agelog),debtlog),data.frame(married)),data.frame(bank.cust         )),data.frame(educ.lev)),data.frame(ethnicity)),yrs.empllog),data.frame(prior.def)),data.frame(empl)),cr.sclog),data.frame(dr.lic)),data.frame(citizen)),inclog),data.frame(y))
+
+#new data-delete zip code, log transformation and standardise the data for Knn
+knn_X <- cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(data.frame('sex'=xxc.ed_new$sex),data.frame('married'=xxc.ed_new$married)),data.frame('bank.cust'=xxc.ed_new$bank.cust)),data.frame('prior.def'=xxc.ed_new$prior.def)),data.frame('empl'=xxc.ed_new$empl)),data.frame('dr.lic'=xxc.ed_new$dr.lic)),data.frame('citizen'=xxc.ed_new$citizen)),data.frame('ethnicity'=xxc.ed_new$ethnicity)),data.frame('educ.lev'=xxc.ed_new$educ.lev)),data.frame(xxc.num.ed_log_scale))
+knn_Y <- data.frame('y' = xxc.ed_new$y)
+knn_XY <- cbind(knn_X, knn_Y)
+
+library(kmed)
+#promoted Knn for different distance function
+Knn_pro <- function(trainx, testx, trainy, K, method)
+{
+  # a empty vector for prediction
+  pred <- c()
+  prob <- c()
+  # calculate distance
+  n_train <- nrow(trainx)
+  n_test <- nrow(testx)
+  X <- rbind(trainx, testx)
+  
+  #distance between a train set and a test set, each column represents an observation in a test set,each row represents an observation in a training set
+  dist <- matrix(distmix(X, method=method, idnum = 9:14, idbin = 1:7, idcat = 8)[1:n_train,(n_train+1):(n_train+n_test)],nrow = n_train) 
+  
+  # Iterate over each each data point in a test set
+  for (i in 1:n_test)
+  {
+    # combine the distance and the corresponding y values
+    dist_y <- data.frame(dist = dist[,i], 'y' = trainy)
+    # sort observations according to distance
+    dist_y <- dist_y[order(dist_y$dist),]
+    # Choose the K closest neighbours
+    dist_y.neigh <- dist_y[1:K,]
+    #Identify the class of the higher occurrence
+    pred1 <- names(sort(summary(dist_y.neigh$y), decreasing=T)[1])
+    prob1 <- sum(dist_y.neigh$y==1)/K
+    pred <- c(pred, pred1)
+    prob <- c(prob, prob1)
+  }
+  return(list('class'= pred,'prob'= prob))
+}
+
+#k-Fold CV, K-nearest neighbors
+CV_Knn_pro <- function(data, k, K, method)
+{
+  set.seed(415)
+  data <- data[sample(nrow(data)),]
+  #Randomly break up the data into k folds
+  fold <- cut(seq(1,nrow(data)), breaks = k, labels=FALSE) #range from 1 to k
+  err <- 0
+  haty <- c()
+  hatp <- c()
+  testy <- c()
+  for(i in 1:k)
+  {
+    test_index <- which(fold==i, arr.ind=TRUE) #arr.ind=TRUE means the coordinate or position of fold==i
+    testX <- data[test_index, 1:(ncol(data)-1)]
+    trainX <- data[-test_index, 1:(ncol(data)-1)]
+    testY <- data[test_index, ncol(data)]
+    trainY <- data[-test_index, ncol(data)]
+    ## Use the classifier Knn
+    haty1 <- Knn_pro(trainX, testX, trainY, K, method)$class
+    hatp1 <- Knn_pro(trainX, testX, trainY, K, method)$prob
+    err <- err + mean(haty1 != testY)
+    haty <- c(haty, haty1)
+    hatp <- c(hatp, hatp1)
+    testy <- c(testy,testY)
+  }
+  err <- err/k
+  return(list('cv.error' = err, 'haty' = haty, 'hatp'=hatp, 'testy'=testy))
+}
+
+#search K
+CV_Knn.err <- matrix(numeric(K_length*2), nrow = K_length, ncol = 2)
+i <- 0
+K_range
+K_range <- seq(1,655,2)
+for(K in K_range)
+{
+  i <- i+1
+  CV_Knn.err[i,2] <- CV_Knn_pro(knn_XY, k=5, K, "gower")$cv.error
+  CV_Knn.err[i,1] <- K
+}
+index_K <- which(CV_Knn.err[,2]==min(CV_Knn.err[,2]))
+K <- CV_Knn.err[index_K,1]
+cat('The optimal value of K is', K,'and the test error rate is',CV_Knn.err[index_K,2])
+
+CV_Knn.err <- data.frame(K= CV_Knn.err[,1], test.error.rate=CV_Knn.err[,2])
+#Visualize K search
+p1 <- ggplot(data=CV_Knn.err, aes(x = K, y = test.error.rate)) +
+    geom_line(linetype=1, color="black", size = 0.7) +      
+    geom_point(data=CV_Knn.err[CV_Knn.err$K%%10==1,],color='red', size = 2) +
+    labs(title="Knn classifier Search K of 5-fold CV based on Gower distance",x = "K Neighbours", y="test error rate") + 
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5))
+
+s_CV_Knn.err <- CV_Knn.err[1:50,]
+p2 <- ggplot(data=s_CV_Knn.err, aes(x = K, y = test.error.rate)) +
+    geom_line(linetype=1, color="black", size = 0.7) +      
+    geom_point(color='red', size = 2) +
+    labs(title="Knn classifier Search smaller K of 5-fold CV based on Gower distance",x = "K Neighbours", y="test error rate") + 
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5))
+library(gridExtra)
+grid.arrange(p1,p2,nrow=1)#combine two plots into one figure
+
+CV_Knn.gower <- CV_Knn_pro (knn_XY, k=5, K=15, "gower")
+CV_Knn.err <-CV_Knn.gower$cv.error
+CV_Knn.haty <- CV_Knn.gower$haty
+CV_Knn.testy <- CV_Knn.gower$testy
+CV_Knn.hatp <- CV_Knn.gower$hatp
+CV.confusion.matrix.Knn.Gower <- table(CV_Knn.testy, CV_Knn.haty)
+names(dimnames(CV.confusion.matrix.Knn.Gower))<-c("Actual", "Predicted")
+addmargins(CV.confusion.matrix.Knn.Gower)
+CV.accuracy.Knn.Gower<-(CV.confusion.matrix.Knn.Gower[1,1]+CV.confusion.matrix.Knn.Gower[2,2])/nrow(knn_XY)
+CV.accuracy.Knn.Gower
+1-CV.accuracy.Knn.Gower
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table2.4 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(CV.confusion.matrix.Knn.Gower[1,1],CV.confusion.matrix.Knn.Gower[1,2],CV.confusion.matrix.Knn.Gower[2,1],CV.confusion.matrix.Knn.Gower[2,2]))
+t2.4 <- table2.4 %>%
+  mutate(judge = ifelse(table2.4$Predicted == table2.4$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.4 <- ggplot(t2.4, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.4$Actual))) + 
+  labs(title = "KNN using 5-Fold CV and Gower distance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#Gower's distance + The Validation Set Approach
+set.seed(415)
+#80% training data to 20% test data based on the Pareto Principle
+sample_size = floor(0.8*nrow(knn_XY)) #the size of the training set
+picked <- sample(seq_len(nrow(knn_XY)),size = sample_size)
+trainingX.knn <- knn_X[picked,]#the training set
+testX.knn <- knn_X[-picked,]#the test set
+trainingY.knn <- knn_Y[picked,]
+testY.knn <- knn_Y[-picked,]
+validation_Knn.gower <- Knn_pro(trainingX.knn, testX.knn, trainingY.knn, 15,"gower")
+Knn_pred.Gower <- validation_Knn.gower$class
+prob.Gower <- validation_Knn.gower$prob
+confusion.matrix.Knn.Gower <- table(testY.knn, Knn_pred.Gower)
+names(dimnames(confusion.matrix.Knn.Gower))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.Knn.Gower)
+accuracy.Knn.Gower<-(confusion.matrix.Knn.Gower[1,1]+confusion.matrix.Knn.Gower[2,2])/nrow(testX.knn)
+accuracy.Knn.Gower
+1-accuracy.Knn.Gower
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table2.3 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.Knn.Gower[1,1],confusion.matrix.Knn.Gower[1,2],confusion.matrix.Knn.Gower[2,1],confusion.matrix.Knn.Gower[2,2]))
+t2.3 <- table2.3 %>%
+  mutate(judge = ifelse(table2.3$Predicted == table2.3$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.3 <- ggplot(t2.3, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.3$Actual))) + 
+  labs(title = "Knn using The Validation Set Approach and Gower distance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(CV_Knn.testy, CV_Knn.hatp, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "Gower distance")
+plot.roc(testY.knn, prob.Gower, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("5-Fold CV","Validation"),col=c("#377eb8","#4daf4a"),lwd=4)
+```
+
+
+```{r}
+library(kmed)
+#Podani diatance
+#search K
+CV_Knn.err <- matrix(numeric(K_length*2), nrow = K_length, ncol = 2)
+i <- 0
+for(K in K_range)
+{
+  i <- i+1
+  CV_Knn.err[i,2] <- CV_Knn_pro(knn_XY, k=5, K, "podani")$cv.error
+  CV_Knn.err[i,1] <- K
+}
+index_K <- which(CV_Knn.err[,2]==min(CV_Knn.err[,2]))
+K <- CV_Knn.err[index_K,1]
+cat('The optimal value of K is', K,'and the test error rate is',CV_Knn.err[index_K,2])
+
+CV_Knn.err <- data.frame(K= CV_Knn.err[,1], test.error.rate=CV_Knn.err[,2])
+#Visualize K search
+p1 <- ggplot(data=CV_Knn.err, aes(x = K, y = test.error.rate)) +
+    geom_line(linetype=1, color="black", size = 0.7) +      
+    geom_point(data=CV_Knn.err[CV_Knn.err$K%%10==1,],color='red', size = 2) +
+    labs(title="Knn classifier Search K of 5-fold CV based on Podani distance",x = "K Neighbours", y="test error rate") + 
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5))
+
+s_CV_Knn.err <- CV_Knn.err[1:50,]
+p2 <- ggplot(data=s_CV_Knn.err, aes(x = K, y = test.error.rate)) +
+    geom_line(linetype=1, color="black", size = 0.7) +      
+    geom_point(color='red', size = 2) +
+    labs(title="Knn classifier Search smaller K of 5-fold CV based on Podani distance",x = "K Neighbours", y="test error rate") + 
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5))
+library(gridExtra)
+grid.arrange(p1,p2,nrow=1)#combine two plots into one figure
+
+CV_Knn.podani <- CV_Knn_pro (knn_XY, k=5, K=15, "podani")
+CV_Knn.err <-CV_Knn.podani$cv.error
+CV_Knn.haty <- CV_Knn.podani$haty
+CV_Knn.testy <- CV_Knn.podani$testy
+CV_Knn.hatp <- CV_Knn.podani$hatp
+CV.confusion.matrix.Knn.podani <- table(CV_Knn.testy, CV_Knn.haty)
+names(dimnames(CV.confusion.matrix.Knn.podani))<-c("Actual", "Predicted")
+addmargins(CV.confusion.matrix.Knn.podani)
+CV.accuracy.Knn.podani<-(CV.confusion.matrix.Knn.podani[1,1]+CV.confusion.matrix.Knn.podani[2,2])/nrow(knn_XY)
+CV.accuracy.Knn.podani
+1-CV.accuracy.Knn.podani
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr) 
+table2.6 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(CV.confusion.matrix.Knn.podani[1,1],CV.confusion.matrix.Knn.podani[1,2],CV.confusion.matrix.Knn.podani[2,1],CV.confusion.matrix.Knn.podani[2,2]))
+t2.6 <- table2.6 %>% 
+  mutate(judge = ifelse(table2.6$Predicted == table2.6$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.6 <- ggplot(t2.6, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.6$Actual))) + 
+  labs(title = "KNN using 5-Fold CV and Podani distance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#Podani distance + The Validation Set Approach
+set.seed(415)
+#80% training data to 20% test data based on the Pareto Principle
+sample_size = floor(0.8*nrow(knn_XY)) #the size of the training set
+picked <- sample(seq_len(nrow(knn_XY)),size = sample_size)
+trainingX.knn <- knn_X[picked,]#the training set
+testX.knn <- knn_X[-picked,]#the test set
+trainingY.knn <- knn_Y[picked,]
+testY.knn <- knn_Y[-picked,]
+validation_Knn.podani <- Knn_pro(trainingX.knn, testX.knn, trainingY.knn, 15,"podani")
+Knn_pred.podani <- validation_Knn.podani$class
+prob.podani <- validation_Knn.podani$prob
+confusion.matrix.Knn.podani <- table(testY.knn, Knn_pred.podani)
+names(dimnames(confusion.matrix.Knn.podani))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.Knn.podani)
+accuracy.Knn.podani<-(confusion.matrix.Knn.podani[1,1]+confusion.matrix.Knn.podani[2,2])/nrow(testX.knn)
+accuracy.Knn.podani
+1-accuracy.Knn.podani
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table2.5 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.Knn.podani[1,1],confusion.matrix.Knn.podani[1,2],confusion.matrix.Knn.podani[2,1],confusion.matrix.Knn.podani[2,2]))
+t2.5 <- table2.5 %>%
+  mutate(judge = ifelse(table2.5$Predicted == table2.5$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.5 <- ggplot(t2.5, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.5$Actual))) + 
+  labs(title = "Knn using The Validation Set Approach and Podani distance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(CV_Knn.testy, CV_Knn.hatp, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "Podani distance")
+plot.roc(testY.knn, prob.podani, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("5-Fold CV","Validation"),col=c("#377eb8","#4daf4a"),lwd=4)
+```
+
+```{r}
+#Wishart distance
+#search K
+library(kmed)
+CV_Knn.err <- matrix(numeric(K_length*2), nrow = K_length, ncol = 2)
+i <- 0
+K_range <- seq(1,655,2)
+for(K in K_range)
+{
+  i <- i+1
+  CV_Knn.err[i,2] <- CV_Knn_pro(knn_XY, k=5, K, "wishart")$cv.error
+  CV_Knn.err[i,1] <- K
+}
+index_K <- which(CV_Knn.err[,2]==min(CV_Knn.err[,2]))
+K <- CV_Knn.err[index_K,1]
+cat('The optimal value of K is', K,'and the test error rate is',CV_Knn.err[index_K,2])
+
+CV_Knn.err <- data.frame(K= CV_Knn.err[,1], test.error.rate=CV_Knn.err[,2])
+#Visualize K search
+p1 <- ggplot(data=CV_Knn.err, aes(x = K, y = test.error.rate)) +
+    geom_line(linetype=1, color="black", size = 0.7) +      
+    geom_point(data=CV_Knn.err[CV_Knn.err$K%%10==1,],color='red', size = 2) +
+    labs(title="Knn classifier Search K of 5-fold CV based on Wishart distance",x = "K Neighbours", y="test error rate") + 
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5))
+
+s_CV_Knn.err <- CV_Knn.err[1:50,]
+p2 <- ggplot(data=s_CV_Knn.err, aes(x = K, y = test.error.rate)) +
+    geom_line(linetype=1, color="black", size = 0.7) +      
+    geom_point(color='red', size = 2) +
+    labs(title="Knn classifier Search smaller K of 5-fold CV based on Wishart distance",x = "K Neighbours", y="test error rate") + 
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5))
+library(gridExtra)
+grid.arrange(p1,p2,nrow=1)#combine two plots into one figure
+
+CV_Knn.wishart <- CV_Knn_pro (knn_XY, k=5, K=5, "wishart")
+CV_Knn.err <-CV_Knn.wishart$cv.error
+CV_Knn.haty <- CV_Knn.wishart$haty
+CV_Knn.testy <- CV_Knn.wishart$testy
+CV_Knn.hatp <- CV_Knn.wishart$hatp
+CV.confusion.matrix.Knn.wishart <- table(CV_Knn.testy, CV_Knn.haty)
+names(dimnames(CV.confusion.matrix.Knn.wishart))<-c("Actual", "Predicted")
+addmargins(CV.confusion.matrix.Knn.wishart)
+CV.accuracy.Knn.wishart<-(CV.confusion.matrix.Knn.wishart[1,1]+CV.confusion.matrix.Knn.wishart[2,2])/nrow(knn_XY)
+CV.accuracy.Knn.wishart
+1-CV.accuracy.Knn.wishart
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr) 
+table2.10 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(CV.confusion.matrix.Knn.wishart[1,1],CV.confusion.matrix.Knn.wishart[1,2],CV.confusion.matrix.Knn.wishart[2,1],CV.confusion.matrix.Knn.wishart[2,2]))
+t2.10 <- table2.10 %>% 
+  mutate(judge = ifelse(table2.10$Predicted == table2.10$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.10 <- ggplot(t2.10, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.10$Actual))) + 
+  labs(title = "KNN using 5-Fold CV and Wishart distance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#wishart distance + The Validation Set Approach
+set.seed(415)
+#80% training data to 20% test data based on the Pareto Principle
+sample_size = floor(0.8*nrow(knn_XY)) #the size of the training set
+picked <- sample(seq_len(nrow(knn_XY)),size = sample_size)
+trainingX.knn <- knn_X[picked,]#the training set
+testX.knn <- knn_X[-picked,]#the test set
+trainingY.knn <- knn_Y[picked,]
+testY.knn <- knn_Y[-picked,]
+validation_Knn.wishart <- Knn_pro(trainingX.knn, testX.knn, trainingY.knn, 5,"wishart")
+Knn_pred.wishart <- validation_Knn.wishart$class
+prob.wishart <- validation_Knn.wishart$prob
+confusion.matrix.Knn.wishart <- table(testY.knn, Knn_pred.wishart)
+names(dimnames(confusion.matrix.Knn.wishart))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.Knn.wishart)
+accuracy.Knn.wishart<-(confusion.matrix.Knn.wishart[1,1]+confusion.matrix.Knn.wishart[2,2])/nrow(testX.knn)
+accuracy.Knn.wishart
+1-accuracy.Knn.wishart
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table2.9 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.Knn.wishart[1,1],confusion.matrix.Knn.wishart[1,2],confusion.matrix.Knn.wishart[2,1],confusion.matrix.Knn.wishart[2,2]))
+t2.9 <- table2.9 %>%
+  mutate(judge = ifelse(table2.9$Predicted == table2.9$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.9 <- ggplot(t2.9, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.9$Actual))) + 
+  labs(title = "Knn using The Validation Set Approach and Wishart distance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(CV_Knn.testy, CV_Knn.hatp, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "Wishart distance")
+plot.roc(testY.knn, prob.wishart, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("5-Fold CV","Validation"),col=c("#377eb8","#4daf4a"),lwd=4)
+```
+
+
+
+```{r}
+library(kmed)
+#Ahmad distance
+#search K
+CV_Knn.err <- matrix(numeric(K_length*2), nrow = K_length, ncol = 2)
+i <- 0
+K_range <- seq(1,51,2)
+for(K in K_range)
+{
+  i <- i+1
+  CV_Knn.err[i,2] <- CV_Knn_pro(knn_XY, k=5, K, "ahmad")$cv.error
+  CV_Knn.err[i,1] <- K
+}
+
+index_K <- which(CV_Knn.err[1:26,2]==min(CV_Knn.err[1:26,2]))
+K <- CV_Knn.err[index_K,1]
+cat('The optimal value of K is', K,'and the test error rate is',CV_Knn.err[index_K,2])
+
+CV_Knn.err <- data.frame(K= CV_Knn.err[1:26,1], test.error.rate=CV_Knn.err[1:26,2])
+#Visualize K search
+p1 <- ggplot(data=CV_Knn.err, aes(x = K, y = test.error.rate)) +
+    geom_line(linetype=1, color="black", size = 0.7) +      
+    geom_point(color='red', size = 2) +
+    labs(title="Knn classifier Search K of 5-fold CV based on Ahmad distance",x = "K Neighbours", y="test error rate") + 
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5))
+
+CV_Knn.ahmad <- CV_Knn_pro (knn_XY, k=5, K=7, "ahmad")
+CV_Knn.err <-CV_Knn.ahmad$cv.error
+CV_Knn.haty <- CV_Knn.ahmad$haty
+CV_Knn.testy <- CV_Knn.ahmad$testy
+CV_Knn.hatp <- CV_Knn.ahmad$hatp
+CV.confusion.matrix.Knn.ahmad <- table(CV_Knn.testy, CV_Knn.haty)
+names(dimnames(CV.confusion.matrix.Knn.ahmad))<-c("Actual", "Predicted")
+addmargins(CV.confusion.matrix.Knn.ahmad)
+CV.accuracy.Knn.ahmad<-(CV.confusion.matrix.Knn.ahmad[1,1]+CV.confusion.matrix.Knn.ahmad[2,2])/nrow(knn_XY)
+CV.accuracy.Knn.ahmad
+1-CV.accuracy.Knn.ahmad
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr) 
+table2.8 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(CV.confusion.matrix.Knn.ahmad[1,1],CV.confusion.matrix.Knn.ahmad[1,2],CV.confusion.matrix.Knn.ahmad[2,1],CV.confusion.matrix.Knn.ahmad[2,2]))
+t2.8 <- table2.8 %>% 
+  mutate(judge = ifelse(table2.8$Predicted == table2.8$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.8 <- ggplot(t2.8, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.8$Actual))) + 
+  labs(title = "KNN using 5-Fold CV and Ahmad distance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#Ahmad distance + The Validation Set Approach
+set.seed(415)
+#80% training data to 20% test data based on the Pareto Principle
+sample_size = floor(0.8*nrow(knn_XY)) #the size of the training set
+picked <- sample(seq_len(nrow(knn_XY)),size = sample_size)
+trainingX.knn <- knn_X[picked,]#the training set
+testX.knn <- knn_X[-picked,]#the test set
+trainingY.knn <- knn_Y[picked,]
+testY.knn <- knn_Y[-picked,]
+validation_Knn.ahmad <- Knn_pro(trainingX.knn, testX.knn, trainingY.knn, 7,"ahmad")
+Knn_pred.ahmad <- validation_Knn.ahmad$class
+prob.ahmad <- validation_Knn.ahmad$prob
+confusion.matrix.Knn.ahmad <- table(testY.knn, Knn_pred.ahmad)
+names(dimnames(confusion.matrix.Knn.ahmad))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.Knn.ahmad)
+accuracy.Knn.ahmad<-(confusion.matrix.Knn.ahmad[1,1]+confusion.matrix.Knn.ahmad[2,2])/nrow(testX.knn)
+accuracy.Knn.ahmad
+1-accuracy.Knn.ahmad
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table2.7 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.Knn.ahmad[1,1],confusion.matrix.Knn.ahmad[1,2],confusion.matrix.Knn.ahmad[2,1],confusion.matrix.Knn.ahmad[2,2]))
+t2.7 <- table2.7 %>%
+  mutate(judge = ifelse(table2.7$Predicted == table2.7$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m2.7 <- ggplot(t2.7, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table2.7$Actual))) + 
+  labs(title = "Knn using The Validation Set Approach and Ahmad distance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(CV_Knn.testy, CV_Knn.hatp, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "Ahmad distance")
+plot.roc(testY.knn, prob.ahmad, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("5-Fold CV","Validation"),col=c("#377eb8","#4daf4a"),lwd=4)
+
+#combine confusion matrix
+grid.arrange(m2.3,m2.4,m2.5,m2.6,m2.9,m2.10,m2.7,m2.8,nrow=4)
+```
+
+#SVM
+# a grid search for hyperparameters
+```{r}
+#new data-delete zip code, log transformation, factor-educ.lev and standardise continuous variables for svm
+svm_X <- cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(data.frame('sex'=xxc.ed_new$sex),data.frame('married'=xxc.ed_new$married)),data.frame('bank.cust'=xxc.ed_new$bank.cust)),data.frame('prior.def'=xxc.ed_new$prior.def)),data.frame('empl'=xxc.ed_new$empl)),data.frame('dr.lic'=xxc.ed_new$dr.lic)),data.frame('citizen'=xxc.ed_new$citizen)),data.frame('ethnicity'=xxc.ed_new$ethnicity)),data.frame('educ.lev'=as.factor(xxc.ed_new$educ.lev))),data.frame(xxc.num.ed_log_scale))
+svm_Y <- data.frame('y' = xxc.ed_new$y)
+svm_XY <- cbind(svm_X, svm_Y)
+
+#find the hyperparameter
+library("e1071")
+set.seed(415)
+#linear kernel
+svm.opt.linear.C<-tune(svm, y ~ ., data = svm_XY, type = "C-classification", kernel = "linear", ranges=list(cost=10^(-2:2)),tunecontrol = tune.control(sampling="cross", cross=5))
+svm.opt.linear.C$best.parameters
+set.seed(415)
+svm.opt.linear.nu<-tune(svm, y ~ ., data = svm_XY, type = "nu-classification", kernel = "linear", ranges=list(cost=10^(-2:2)), control = tune.control(sampling="cross", cross=5))
+svm.opt.linear.nu$best.parameters
+
+#polynomial kernel
+set.seed(415)
+svm.opt.poly.C<-tune(svm, y ~ ., data = svm_XY, type = "C-classification", kernel = "polynomial", ranges=list(cost=10^(-2:2),degree=c(1/2,1,2,3)), control = tune.control(sampling="cross", cross=5))
+svm.opt.poly.C$best.parameters
+set.seed(415)
+svm.opt.poly.nu<-tune(svm, y ~ ., data = svm_XY, type = "nu-classification", kernel = "polynomial", ranges=list(cost=10^(-2:2),degree=c(1/2,1,2,3)), control = tune.control(sampling="cross", cross=5))
+svm.opt.poly.nu$best.parameters
+
+#RBF
+set.seed(415)
+svm.opt.rbf.C<-tune(svm, y ~ ., data = svm_XY, type = "C-classification", kernel = "radial", ranges=list(cost=10^(-2:2),gamma=seq(0.1,1,0.1)), control = tune.control(sampling="cross", cross=5))
+svm.opt.rbf.C$best.parameters
+svm.opt.rbf.nu<-tune(svm, y ~ ., data = svm_XY, type = "nu-classification", kernel = "radial", ranges=list(cost=10^(-2:2),gamma=seq(0.1,1,0.1)), control = tune.control(sampling="cross", cross=5))
+svm.opt.rbf.nu$best.parameters
+
+#sigmoid
+set.seed(415)
+svm.opt.sigmoid.C<-tune(svm, y ~ ., data = svm_XY, type = "C-classification", kernel = "radial", ranges=list(cost=10^(-2:2),gamma=10^(-2:2),coef0=seq(1,1,10)), control = tune.control(sampling="cross", cross=5))
+svm.opt.sigmoid.C$best.parameters
+svm.opt.sigmoid.nu<-tune(svm, y ~ ., data = svm_XY, type = "nu-classification", kernel = "radial", ranges=list(cost=10^(-2:2),gamma=10^(-2:2),coef0=seq(1,1,10)), control = tune.control(sampling="cross", cross=5))
+svm.opt.sigmoid.nu$best.parameters
+```
+
+```{r}
+install.packages("kernlab")
+library(kernlab)
+svm.linear <- ksvm(y ~ ., data = trainingXY.svm, type = "C-svc", kernel = "linear",
+     C = 0.1, nu = 0.2, epsilon = 0.1, prob.model = FALSE,
+     class.weights = NULL, cross = 0, fit = TRUE, cache = 40,
+     tol = 0.001, shrinking = TRUE, ...,
+     na.action = na.omit)
+```
+
+
+```{r}
+library(kernlab, quietly=TRUE)
+set.seed(415)
+k <- 5
+data <- svm_XY
+data <- data[sample(nrow(data)),]
+#Randomly break up the data into k folds
+fold <- cut(seq(1,nrow(data)), breaks = 5, labels=FALSE) #range from 1 to k
+err.C <- 0
+haty.C <- c()
+hatp.C <- c()
+testy.C <- c()
+err.nu <- 0
+haty.nu <- c()
+hatp.nu <- c()
+testy.nu <- c()
+for(i in 1:5)
+{
+  test_index <- which(fold==i, arr.ind=TRUE) #arr.ind=TRUE means the coordinate or position of fold==i
+  testX <- data[test_index, 1:(ncol(data)-1)]
+  trainX <- data[-test_index, 1:(ncol(data)-1)]
+  testY <- data[test_index, ncol(data)]
+  trainY <- data[-test_index, ncol(data)]
+  trainXY <- cbind(trainX, trainY)
+  trainXY <- cbind(trainX, data.frame('y'=trainY))
+  testXY <- cbind(testX, data.frame('y'=testY))
+  # Use SVM.C
+  SVM.C <- ksvm(y ~ ., data = trainXY, type = "C-svc",kernel = "vanilladot", C = 0.1, prob.model = TRUE)
+  hatp1.C <- predict(SVM.C, testXY, type = "probabilities")[,2]
+  haty1.C <- predict(SVM.C, testXY)
+  err.C <- err.C + mean(haty1.C != testY)
+  haty.C <- c(haty.C, haty1.C)
+  hatp.C <- c(hatp.C, hatp1.C)
+  testy.C <- c(testy.C,testY)
+  # Use SVM.nu
+  SVM.nu <- ksvm(y ~ ., data = trainXY, type = "nu-svc",kernel = "vanilladot", nu = 0.1, prob.model = TRUE)
+  hatp1.nu <- predict(SVM.nu, testXY, type = "probabilities")[,2]
+  haty1.nu <- predict(SVM.nu, testXY)
+  err.nu <- err.nu + mean(haty1.nu != testY)
+  haty.nu <- c(haty.nu, haty1.nu)
+  hatp.nu <- c(hatp.nu, hatp1.nu)
+  testy.nu <- c(testy.nu,testY)
+  }
+err.C <- err.C/k
+err.nu <- err.nu/k
+
+#C-SVM+linear
+confusion.matrix.C <- table(testy.C, haty.C)
+names(dimnames(confusion.matrix.C))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.C)
+accuracy.C<-(confusion.matrix.C[1,1]+confusion.matrix.C[2,2])/655
+accuracy.C
+1-accuracy.C
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3.1 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.C[1,1],confusion.matrix.C[1,2],confusion.matrix.C[2,1],confusion.matrix.C[2,2]))
+t3.1 <- table3.1 %>%
+  mutate(judge = ifelse(table3.1$Predicted == table3.1$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m3.1 <- ggplot(t3.1, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3.1$Actual))) + 
+  labs(title = "C-SVM using 5-Fold CV and linear kernel function") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#nu-SVM+linear
+confusion.matrix.nu <- table(testy.nu, haty.nu)
+names(dimnames(confusion.matrix.nu))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.nu)
+accuracy.nu<-(confusion.matrix.nu[1,1]+confusion.matrix.nu[2,2])/655
+accuracy.nu
+1-accuracy.nu
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3.2 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.nu[1,1],confusion.matrix.nu[1,2],confusion.matrix.nu[2,1],confusion.matrix.nu[2,2]))
+t3.2 <- table3.2 %>%
+  mutate(judge = ifelse(table3.2$Predicted == table3.2$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m3.2 <- ggplot(t3.2, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3.2$Actual))) + 
+  labs(title = "nu-SVM using 5-Fold CV and linear kernel function") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+#ROC curve
+library(pROC)
+par(pty="s")
+roc(testy.C, hatp.C, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "linear kernel function")
+plot.roc(testy.nu, hatp.nu, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("C-SVM","nu-SVM"),col=c("#377eb8","#4daf4a"),lwd=4)
+```
+
+#rbf
+```{r}
+set.seed(415)
+data <- svm_XY
+data <- data[sample(nrow(data)),]
+#Randomly break up the data into k folds
+fold <- cut(seq(1,nrow(data)), breaks = 5, labels=FALSE) #range from 1 to k
+err.C <- 0
+haty.C <- c()
+hatp.C <- c()
+testy.C <- c()
+err.nu <- 0
+haty.nu <- c()
+hatp.nu <- c()
+testy.nu <- c()
+for(i in 1:5)
+{
+  test_index <- which(fold==i, arr.ind=TRUE) #arr.ind=TRUE means the coordinate or position of fold==i
+  testX <- data[test_index, 1:(ncol(data)-1)]
+  trainX <- data[-test_index, 1:(ncol(data)-1)]
+  testY <- data[test_index, ncol(data)]
+  trainY <- data[-test_index, ncol(data)]
+  trainXY <- cbind(trainX, trainY)
+  trainXY <- cbind(trainX, data.frame('y'=trainY))
+  testXY <- cbind(testX, data.frame('y'=testY))
+  # Use SVM.C
+  SVM.C <- ksvm(y ~ ., data = trainXY, type = "C-svc",kernel = "rbfdot", C = 10, kpar=list( sigma=0.1), prob.model = TRUE)
+  hatp1.C <- predict(SVM.C, testXY, type = "probabilities")[,2]
+  haty1.C <- predict(SVM.C, testXY)
+  err.C <- err.C + mean(haty1.C != testY)
+  haty.C <- c(haty.C, haty1.C)
+  hatp.C <- c(hatp.C, hatp1.C)
+  testy.C <- c(testy.C,testY)
+  # Use SVM.nu
+  SVM.nu <- ksvm(y ~ ., data = trainXY, type = "nu-svc",kernel = "rbfdot",nu = 0.01, kpar=list(sigma=0.1), prob.model = TRUE)
+  hatp1.nu <- predict(SVM.nu, testXY, type = "probabilities")[,2]
+  haty1.nu <- predict(SVM.nu, testXY)
+  err.nu <- err.nu + mean(haty1.nu != testY)
+  haty.nu <- c(haty.nu, haty1.nu)
+  hatp.nu <- c(hatp.nu, hatp1.nu)
+  testy.nu <- c(testy.nu,testY)
+  }
+err.C <- err.C/5
+err.nu <- err.nu/5
+
+#C-SVM+rbf
+confusion.matrix.C <- table(testy.C, haty.C)
+names(dimnames(confusion.matrix.C))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.C)
+accuracy.C<-(confusion.matrix.C[1,1]+confusion.matrix.C[2,2])/655
+accuracy.C
+1-accuracy.C
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3.3 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.C[1,1],confusion.matrix.C[1,2],confusion.matrix.C[2,1],confusion.matrix.C[2,2]))
+t3.3 <- table3.3 %>%
+  mutate(judge = ifelse(table3.3$Predicted == table3.3$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m3.3 <- ggplot(t3.3, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3.3$Actual))) + 
+  labs(title = "C-SVM using 5-Fold CV and RBF kernel function") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#nu-SVM+rbf
+confusion.matrix.nu <- table(testy.nu, haty.nu)
+names(dimnames(confusion.matrix.nu))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.nu)
+accuracy.nu<-(confusion.matrix.nu[1,1]+confusion.matrix.nu[2,2])/655
+accuracy.nu
+1-accuracy.nu
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3.4 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.nu[1,1],confusion.matrix.nu[1,2],confusion.matrix.nu[2,1],confusion.matrix.nu[2,2]))
+t3.4 <- table3.4 %>%
+  mutate(judge = ifelse(table3.4$Predicted == table3.4$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m3.4 <- ggplot(t3.4, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3.4$Actual))) + 
+  labs(title = "nu-SVM using 5-Fold CV and RBF function") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+library(pROC)
+par(pty="s")
+roc(testy.C, hatp.C, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "RBF")
+plot.roc(testy.nu, hatp.nu, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("C-SVM","nu-SVM"),col=c("#377eb8","#4daf4a"),lwd=4)
+```
+
+#Sigmoid
+```{r}
+set.seed(415)
+data <- svm_XY
+data <- data[sample(nrow(data)),]
+#Randomly break up the data into k folds
+fold <- cut(seq(1,nrow(data)), breaks = k, labels=FALSE) #range from 1 to k
+err.C <- 0
+haty.C <- c()
+hatp.C <- c()
+testy.C <- c()
+err.nu <- 0
+haty.nu <- c()
+hatp.nu <- c()
+testy.nu <- c()
+for(i in 1:5)
+{
+  test_index <- which(fold==i, arr.ind=TRUE) #arr.ind=TRUE means the coordinate or position of fold==i
+  testX <- data[test_index, 1:(ncol(data)-1)]
+  trainX <- data[-test_index, 1:(ncol(data)-1)]
+  testY <- data[test_index, ncol(data)]
+  trainY <- data[-test_index, ncol(data)]
+  trainXY <- cbind(trainX, trainY)
+  trainXY <- cbind(trainX, data.frame('y'=trainY))
+  testXY <- cbind(testX, data.frame('y'=testY))
+  # Use SVM.C
+  SVM.C <- ksvm(y ~ ., data = trainXY, type = "C-svc",kernel = "tanhdot", C = 10, kpar=list( scale=0.1, offset=1), prob.model = TRUE)
+  hatp1.C <- predict(SVM.C, testXY, type = "probabilities")[,2]
+  haty1.C <- predict(SVM.C, testXY)
+  err.C <- err.C + mean(haty1.C != testY)
+  haty.C <- c(haty.C, haty1.C)
+  hatp.C <- c(hatp.C, hatp1.C)
+  testy.C <- c(testy.C,testY)
+  # Use SVM.nu
+  SVM.nu <- ksvm(y ~ ., data = trainXY, type = "nu-svc", kernel = "tanhdot", nu = 0.01, kpar=list(scale=0.01, offset=1), prob.model = TRUE)
+  hatp1.nu <- predict(SVM.nu, testXY, type = "probabilities")[,2]
+  haty1.nu <- predict(SVM.nu, testXY)
+  err.nu <- err.nu + mean(haty1.nu != testY)
+  haty.nu <- c(haty.nu, haty1.nu)
+  hatp.nu <- c(hatp.nu, hatp1.nu)
+  testy.nu <- c(testy.nu,testY)
+  }
+err.C <- err.C/k
+err.nu <- err.nu/k
+
+#C-SVM+Sigmoid
+confusion.matrix.C <- table(testy.C, haty.C)
+names(dimnames(confusion.matrix.C))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.C)
+accuracy.C<-(confusion.matrix.C[1,1]+confusion.matrix.C[2,2])/655
+accuracy.C
+1-accuracy.C
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3.5 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.C[1,1],confusion.matrix.C[1,2],confusion.matrix.C[2,1],confusion.matrix.C[2,2]))
+t3.5 <- table3.5 %>%
+  mutate(judge = ifelse(table3.5$Predicted == table3.5$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m3.5 <- ggplot(t3.5, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3.5$Actual))) + 
+  labs(title = "C-SVM using 5-Fold CV and Sigmoid kernel function") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#nu-SVM+Sigmoid
+confusion.matrix.nu <- table(testy.nu, haty.nu)
+names(dimnames(confusion.matrix.nu))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.nu)
+accuracy.nu<-(confusion.matrix.nu[1,1]+confusion.matrix.nu[2,2])/655
+accuracy.nu
+1-accuracy.nu
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3.6 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.nu[1,1],confusion.matrix.nu[1,2],confusion.matrix.nu[2,1],confusion.matrix.nu[2,2]))
+t3.6 <- table3.6 %>%
+  mutate(judge = ifelse(table3.6$Predicted == table3.6$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m3.6 <- ggplot(t3.6, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3.6$Actual))) + 
+  labs(title = "nu-SVM using 5-Fold CV and Sigmoid function") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+library(pROC)
+par(pty="s")
+roc(testy.C, hatp.C, plot=TRUE, legacy.axes=TRUE, xlab="FPR(1-Specificity)",ylab="TPR(Sensitivity)",col = "#377eb8",lwd = 4, print.auc = TRUE, print.auc.x=0.45, auc.polygon=TRUE, auc.polygon.col = "#377eb822",main = "Sigmoid kernel function")
+plot.roc(testy.nu, hatp.nu, col = "#4daf4a",lwd = 4, print.auc = TRUE,add = TRUE, print.auc.y=0.4)
+legend("bottomright",legend=c("C-SVM","nu-SVM"),col=c("#377eb8","#4daf4a"),lwd=4)
+library(gridExtra)
+grid.arrange(m3.1,m3.2,m3.3,m3.4,m3.5,m3.6,nrow=3)
+```
+
+```{r}
+#custom kernel function
+k <- function(x,y) 
+{
+  0.5((t(x)%*%y)+exp(-0.1*t(x-y)%*%(x-y)))+(t(x)%*%y-exp(-0.1*t(x-y)%*%(x-y)))^2
+}
+class(k) <- "kernel"
+svm_Xn <- cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(cbind(data.frame('sex'=as.numeric(xxc.ed_new$sex)),data.frame('married'=as.numeric(xxc.ed_new$married))),data.frame('bank.cust'=as.numeric(xxc.ed_new$bank.cust))),data.frame('prior.def'=as.numeric(xxc.ed_new$prior.def))),data.frame('empl'=as.numeric(xxc.ed_new$empl))),data.frame('dr.lic'=as.numeric(xxc.ed_new$dr.lic))),data.frame('citizen'=as.numeric(xxc.ed_new$citizen))),data.frame('ethnicity'=as.numeric(xxc.ed_new$ethnicity))),data.frame('educ.lev'=as.numeric(xxc.ed_new$educ.lev))),data.frame(xxc.num.ed_log_scale))
+svm_Xn <- data.matrix(svm_Xn)
+svm_Y <- data.frame('y' = xxc.ed_new$y)
+svm_XY_n <- cbind(svm_Xn,svm_Y)
+library(kernlab, quietly=TRUE)
+set.seed(415)
+data <- svm_XY_n
+data <- data[sample(nrow(data)),]
+#Randomly break up the data into k folds
+fold <- cut(seq(1,nrow(data)), breaks = 5, labels=FALSE) #range from 1 to k
+err.C <- 0
+haty.C <- c()
+hatp.C <- c()
+testy.C <- c()
+err.nu <- 0
+haty.nu <- c()
+hatp.nu <- c()
+testy.nu <- c()
+for(i in 1:5)
+{
+  test_index <- which(fold==i, arr.ind=TRUE) #arr.ind=TRUE means the coordinate or position of fold==i
+  testX <- data[test_index, 1:(ncol(data)-1)]
+  trainX <- data.matrix(data[-test_index, 1:(ncol(data)-1)])
+  trainY <- data[-test_index, ncol(data)]
+  testY <- data[test_index, ncol(data)]
+  trainY <- data[-test_index, ncol(data)]
+  trainXY <- cbind(trainX, trainY)
+  trainXY <- cbind(trainX, data.frame('y'=trainY))
+  testXY <- cbind(testX, data.frame('y'=testY))
+  # Use SVM.C
+  SVM.C <-  ksvm(x = trainX, y=as.numeric(trainY), type = "C-svc",kernel = k, C = 0.1, prob.model = TRUE)
+  hatp1.C <- predict(SVM.C, testXY, type = "probabilities")[,2]
+  haty1.C <- predict(SVM.C, testXY)
+  err.C <- err.C + mean(haty1.C != testY)
+  haty.C <- c(haty.C, haty1.C)
+  hatp.C <- c(hatp.C, hatp1.C)
+  testy.C <- c(testy.C,testY)
+  }
+err.C <- err.C/5
+
+#C-SVM+custom
+confusion.matrix.C <- table(testy.C, haty.C)
+names(dimnames(confusion.matrix.C))<-c("Actual", "Predicted")
+addmargins(confusion.matrix.C)
+accuracy.C<-(confusion.matrix.C[1,1]+confusion.matrix.C[2,2])/655
+accuracy.C
+1-accuracy.C
+
+#visualise a confusion matrix
+library(ggplot2)
+library(dplyr)
+table3.7 <- data.frame(Predicted = as.factor(c('0', '1', '0', '1')), Actual = as.factor(c('0', '0', '1', '1')), Freq = c(confusion.matrix.C[1,1],confusion.matrix.C[1,2],confusion.matrix.C[2,1],confusion.matrix.C[2,2]))
+t3.7 <- table3.7 %>%
+  mutate(judge = ifelse(table3.7$Predicted == table3.7$Actual, "right", "wrong")) %>%
+  group_by(Actual)
+m3.7 <- ggplot(t3.7, aes(x = Predicted, y = Actual, fill = judge)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust =0.5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(right = "palegreen", wrong = "lightpink1")) +
+  ylim(rev(levels(table3.7$Actual))) + 
+  labs(title = "C-SVM using 5-Fold CV and custom kernel function") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+
+#imbalanced class
+```{r}
+install.packages("remotes")
+remotes::install_github("dongyuanwu/RSBID")
+library(FNN)
+library(clustMixType)
+library(klaR)
+library(MASS)
+library(RSBID)
+SMOTE_NC
+```
